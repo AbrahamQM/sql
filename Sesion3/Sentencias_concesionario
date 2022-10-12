@@ -1,0 +1,133 @@
+/**..................FABRICANTES...................**/
+
+--Creamos una tabla de fabricantes
+CREATE TABLE manofacturer (
+	id SERIAL,
+	name VARCHAR(50) NOT NULL,
+	num_employees INT,
+	CONSTRAINT pk_manofacturer PRIMARY KEY(id) --En esta línea le indicamos que la clave primaria va a ser la id 
+);
+
+SELECT * FROM manofacturer; --para comprobar el avance
+
+--Insertamos fabricantes de ejemplo 
+INSERT INTO manofacturer (name, num_employees)
+VALUES ('Skoda', 36412);
+
+INSERT INTO manofacturer (name, num_employees)
+VALUES ('Seat', 12541);
+
+/**..................MODELOS...................RELACIONADA CON FABRICANTE**/
+
+--Creamos la tabla modelos con una columna que apunta al el fabricante:
+CREATE TABLE model(
+	id SERIAL,
+	name VARCHAR(50) NOT NULL,
+	id_manofacturer INT,
+	CONSTRAINT pk_model PRIMARY KEY(id), --indicamos que será la clave primaria
+	
+	/*restricción: clave foránea "fk" modelo_fabricante, donde el campo id_manofacturer,
+	apuntará a la tabla manofacturer, columna id */
+	CONSTRAINT fk_model_manofacturer FOREIGN KEY(id_manofacturer) REFERENCES manofacturer(id)
+);
+
+
+SELECT * FROM model; --para comprobar el avance
+
+--Insertamos modelos relacionados con los fabricantes, de ejemplo.
+INSERT INTO model (name, id_manofacturer)
+VALUES ('Octavia', 1);
+
+INSERT INTO model (name, id_manofacturer)
+VALUES ('Leon', 2);
+
+INSERT INTO model (name, id_manofacturer)
+VALUES ('Arona', 2);
+
+INSERT INTO model (name, id_manofacturer)
+VALUES ('Superb', 1);
+
+
+/**..................VERSIONES...................RELACIONADA CON MODELOS**/
+
+CREATE TABLE version(
+	id SERIAL,
+	name VARCHAR (50) NOT NULL,
+	engine VARCHAR(50),
+	price NUMERIC,
+	cc NUMERIC(5,2), --centímetros cúbicos
+	id_model INT,
+	CONSTRAINT pk_version PRIMARY KEY(id),
+	/*
+	Restricción en la que le indicamos que tiene una clave foránea id_model que la enlaza con id 
+	de la tabla modelo
+	En caso de actualización o borrado, lo hará cambiando el valor a null en los elementos de 
+	la tabla version cuya id_model corresponda con el modelo actualizado o borrado.
+-si usáramos la palabra "cascade" en lugar de "SET NULL", y borramos un modelo del que hayan varios
+elementos de la tabla version. Se borrarían los elementos de la tabla version cuya id_model 
+corresponda al modelo borrado. 
+	*/
+	CONSTRAINT fk_version_model FOREIGN KEY(id_model) REFERENCES model(id) ON UPDATE SET NULL ON DELETE SET NULL
+);
+
+
+SELECT * FROM version;
+
+--Insertamos versiones relacionadas con los modelos, de ejemplo.
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('Elegance', 'TDI', 28900, 1.92, 1 );
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('RS', 'Gasoline', 38200, 3.0, 1 );
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('Basic', 'Gasoline', 18900, 1.0, 1 );
+
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('Sport', 'FR', 28500, 2.0, 2 );
+
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('4x4', 'Outdoor', 20900, 1.5, 3 );
+
+INSERT INTO version (name, engine, price, cc, id_model) VALUES ('LX', 'Luxury', 41900, 2.5, 4 );
+
+
+/**..................EXTRAS...................RELACIONADA CON VERSION (MANY TO MANY)**/
+
+CREATE TABLE extra(
+	id SERIAL,
+	name VARCHAR(50) NOT NULL,
+	description VARCHAR(300),
+	CONSTRAINT pk_extra PRIMARY KEY(id)
+);
+
+SELECT * FROM extra;
+
+--inserto extras de ejemplo:
+INSERT INTO extra (name, description) VALUES ('a/a', 'hace que se enfríe el aire en el habitáculo');
+INSERT INTO extra (name, description) VALUES ('levas', 'Cambio secuencial mediante levas en el volante');
+INSERT INTO extra (name, description) VALUES ('Techo solar', 'abertura en el techo del coche');
+INSERT INTO extra (name, description) VALUES ('nevera', 'nevera eléctrica en el maletero del coche');
+
+--Creo una tabla que relaciona de muchos a muchos(many to many) los extras con las veriones,
+--ya que una versión puede tener varios extras y un extra puede estar en varias versiones.
+CREATE TABLE extra_version(
+	id_version INT,
+	id_extra INT,
+	price NUMERIC NOT NULL CHECK (price >= 0),--representa el precio que tiene el extra cuando 
+	--se encuentra en una versión determinada
+	/*	CLAVE PRIMARIA COMBINADA
+	IDENTIFICO id_version e id_extra AMBAS A LA VEZ como clave primaria, de forma que cada
+	uno de los id puede estar muchas veces en la tabla, pero CADA COMBINACIÓN DE AMBAS, SÓLO
+	PODRÁ APARECER UNA VEZ. 
+	No tiene sentido que aparezca 2 veces que el extra 1 está disponible en la versión 1
+	*/
+	CONSTRAINT pf_extra_version PRIMARY KEY(id_version, id_extra),
+	
+	/*	CLAVES FORÁNEAS */
+	CONSTRAINT fk_version_extra FOREIGN KEY(id_version) REFERENCES version(id) ON UPDATE cascade ON DELETE cascade,
+	CONSTRAINT fk_extra_version FOREIGN KEY(id_extra) REFERENCES extra(id) ON UPDATE cascade ON DELETE cascade
+);
+
+SELECT * FROM extra_version;
+
+
+--Insertamos relaciones en extra_version entre extras y las versiones en las que están disponibles, de ejemplo.
+INSERT INTO extra_version (id_version, id_extra, price) VALUES (1, 1, 300.56);
+INSERT INTO extra_version (id_version, id_extra, price) VALUES (1, 2, 300.56);
+
+
+

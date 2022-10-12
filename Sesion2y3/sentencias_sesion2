@@ -1,0 +1,109 @@
+/* Sentencias DML: Data Manipulation Language
+	CRUD: 
+	
+	Create (INSERT INTO)
+	Read (SELECT FROM), 
+	Update (UPDATE SET)
+	Delete (DELETE FROM)
+*/
+
+--Borro la tabla de la sesion anterior para comenzar con nuevos datos:
+DROP TABLE IF EXISTS employees;
+
+--Creo la tabla con la que vamos a trabajar e introduzco primer dato de ejemplo
+CREATE TABLE IF NOT EXISTS employees(
+	id SERIAL PRIMARY KEY,
+	married BOOLEAN,
+	name VARCHAR(250) NOT NULL,
+	email VARCHAR(100) UNIQUE,
+	genre CHAR(1),
+	salary NUMERIC(9,2) CHECK (salary >= 15000),
+	birth_date DATE CHECK (birth_date > '1975-01-01'),
+	start_at TIME
+);
+
+
+INSERT INTO employees (married, name, email, genre, salary, birth_date, start_at) 
+VALUES (TRUE, 'Employee1', 'employee2@company.com', 'M', 16000, '1990-12-25', '08:30:00');
+
+-- 1. Consultas o recuperación de datos
+
+SELECT * FROM employees;
+
+SELECT id FROM employees;
+
+SELECT id, email FROM employees;
+
+SELECT email, id FROM employees;
+
+SELECT id, email, salary FROM employees;
+
+-- Filtrar filas
+SELECT * FROM employees WHERE id = 1;
+
+SELECT * FROM employees WHERE name = 'Employee1';
+
+SELECT * FROM employees WHERE married = 'true';
+
+SELECT * FROM employees WHERE married = TRUE;
+
+SELECT name, email, genre FROM employees WHERE birth_date = '1990-12-25';
+
+SELECT * FROM employees WHERE married = TRUE AND salary > 10000;
+
+SELECT * FROM employees WHERE married = FALSE OR salary <= 16000;
+
+-- 2. Inserción de datos
+
+INSERT INTO employees(name, email) VALUES ('Juan', 'juan@company.com');
+
+INSERT INTO employees(name, email, married, genre, salary) 
+VALUES ('antonio', 'antonio4@company.com', TRUE, 'M', 23566.43);
+
+INSERT INTO employees(name, email, married, genre, salary, birth_date, start_at) 
+VALUES ('francisco', 'francisco@company.com', TRUE, 'M', 23566.43, '1987-5-29', '10:00:00');
+
+INSERT INTO employees(name, email, married, genre, salary, birth_date, start_at) 
+VALUES ('Rosa', 'rosa@company.com', FALSE, 'F', 34543.43, '1990-5-29', '10:00:00');
+
+INSERT INTO employees(name, email, married, genre, salary, birth_date, start_at) 
+VALUES ('Alberto', 'alberto@company.com', FALSE, 'M', 32421.43, '1988-5-29', '10:00:00');
+
+--Insertar sin especificar los campos, hay que definir los valores en el orden de los campos
+INSERT INTO employees
+VALUES (29, TRUE, 'francisco3', 'francisco3@company.com', 'M', 23566.43, '1987-5-29', '10:00:00');
+
+
+-- 3. Actualizar o editar
+
+UPDATE employees SET birth_date = '2000-03-12'; --Actualiza todos los elementos al no tener filtro
+
+UPDATE employees SET birth_date = '2111-01-12' WHERE id = 1;
+
+UPDATE employees SET salary = 45000 WHERE email = 'juan@company.com';
+
+UPDATE employees SET salary = 20000 WHERE name = 'antonio';
+
+UPDATE employees SET genre = 'M', start_at = '11:30:00', married = FALSE WHERE email = 'juan@company.com';
+
+UPDATE employees SET genre = 'M', start_at = '08:30:00' WHERE email = 'noexiste@company.com';
+
+--hacemos que devuelva todos los campos de los registros afectados
+UPDATE employees SET genre = 'F', start_at = '08:30:00' WHERE email = 'juan@company.com' RETURNING *;
+
+
+
+-- 4. Borrar
+SELECT * FROM employees; --sólo para comprobar los cambios
+
+DELETE FROM employees;
+
+DELETE FROM employees WHERE married = TRUE;
+
+DELETE FROM employees WHERE salary < 33000;
+
+DELETE FROM employees WHERE salary IS NULL; --para comparar que es NULL se usa IS en lugar de =
+
+
+
+

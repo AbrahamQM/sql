@@ -1,0 +1,77 @@
+
+--EXPLORAR TABLAS:
+
+--ACTORES
+SELECT * FROM actor;
+--Obtenemos todos los actores apellidados WAHLBERG
+SELECT * FROM actor WHERE last_name = 'WAHLBERG'; 
+
+--DIRECCIONES
+SELECT * FROM address;
+--Obtenemos todos los registros del distrito California
+SELECT * FROM address WHERE district = 'California'; 
+--Obtenemos todos los registros del distrito California con código postal 17886
+SELECT * FROM address WHERE district = 'California' AND postal_code = '17886'; 
+--Obtenemos todos los registros con código postal 17886 O 2299
+SELECT * FROM address WHERE postal_code = '17886' OR postal_code = '2299'; 
+
+--CATEGORÍAS
+SELECT * FROM category;
+
+--CIUDADES
+SELECT * FROM city;
+							--USO DE LIKE (sea como ...)
+--OBTENER LAS CIUDADES QUE COMIENCEN POR LA LETRA T:
+SELECT * FROM city WHERE city LIKE 'T%'; --El símbolo % se usa como solemos usar * 
+
+--PAÍSES
+SELECT * FROM country;
+--Obtengo todos los países que comienzan por S:
+SELECT * FROM country WHERE country LIKE 'S%'
+
+--CONSUMIDORES O CLIENTES
+SELECT * FROM customer;
+--Tódos los clientes que se apellidan PETERSON
+SELECT * FROM customer WHERE last_name = 'PETERSON';
+--Comprobamos si hay algún cliente con perfil desactivado (activebool = FALSE)
+UPDATE customer SET activebool = FALSE WHERE first_name = 'LINDA'; --Activo un cliente ya que no hay ninguno en la bbdd original.
+SELECT * FROM customer WHERE activebool = FALSE;
+
+--Películas
+SELECT * FROM film;
+ --Obtenemos todos los elementos que contienen "Drama" en la descripción usando '%' antes y después
+SELECT * FROM film WHERE description LIKE '%Drama%'; --OJO encuentra Drama pero si probamos drama, no aparece ningún resultado
+
+--RESTO DE TABLAS
+SELECT * FROM film_actor;
+SELECT * FROM film_actor WHERE actor_id = 1; --Todas las películas del actor con id 1 
+SELECT * FROM film_actor WHERE film_id = 1; --Todod los actores que participan en la pelicula con id 1 
+SELECT * FROM film_category;
+SELECT * FROM inventory;
+SELECT * FROM language;
+SELECT * FROM payment;
+SELECT * FROM rental;
+SELECT * FROM staff;
+SELECT * FROM store;
+
+/*****************SESION3****************************************/
+--INSERTAR DATOS 
+--actor
+SELECT * FROM actor; --Para comprobar los cambios
+INSERT INTO actor (first_name, last_name) VALUES ('Abraham', 'Quintana'); --Añadimos un nuevo actor
+
+--customer: Crearemos un cliente con dirección nueva 
+SELECT * FROM address;--obtenemos todas las direcciones para comprobar los campos necesarios.
+
+INSERT INTO address (address, district, city_id, postal_code, phone)
+VALUES ('Calle falsa', 'Alberta', 300, 38911, '666555444'); --Insertamos una nueva dirección en la tabla address
+--se creó nustra dirección con clave unica autoincremental(address_id): 606
+
+SELECT * FROM customer; --obtenemos todas los clientes para comprobar los campos necesarios.
+INSERT INTO customer (store_id, first_name, last_name, email, address_id, activebool, create_date)
+VALUES (1, 'Abraham--Cliente', 'Quintana', 'abraham@abraham.com', 606, TRUE, '2022-10-06');
+
+SELECT * FROM customer WHERE address_id = 606; /*compruebo ue aparece al filtrar por adress_id que hemos creado para 
+esta prueba*/
+
+SELECT * FROM customer; 

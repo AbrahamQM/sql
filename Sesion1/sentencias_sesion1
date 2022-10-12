@@ -1,0 +1,135 @@
+
+--Para ejecutar una Query, seleccionar la query a ejecutar y pulsar F5
+
+-- CREAR/ELIMINAR BASE DE DATOS
+CREATE DATABASE IF NOT EXISTS employees2;
+
+DROP DATABASE IF EXISTS employees2;
+
+--Tipos de datos: 
+--BOOLEAN, 
+--INT, 
+--NUMERIC(dígitos, precisión nº de decimales) 
+--DATE 'AAAA-MM-DD', 
+--TIME 'HH:MM:SS', 
+--    SERIAL, --número auto-incremental
+--VARCHAR(longitud opcional), 
+--CHAR(longitud opcional), 
+--TEXT
+
+--Creación de tablas
+CREATE TABLE IF NOT EXISTS employees(
+	id INT,
+	name VARCHAR(30),
+	married BOOLEAN,
+	genre CHAR(1),
+	salary NUMERIC(9,2),
+	birth_day DATE, 
+	start_at TIME 
+);
+
+--Borrado de tablas
+DROP TABLE IF EXISTS employees;
+
+--Ver datos de una tabla:
+SELECT * FROM employees;
+
+--Insertar datos a una tabla:
+--Lo hago en varias filas, para trabajar más cómodamente, pero se puede hacer en una
+INSERT INTO employees(id, name, married, genre, salary, birth_day, start_at) 
+VALUES (1, 'Abraham', FALSE, 'M', 20000.95, '1987-07-08', '08:30:00');
+
+--Renombrar tabla
+ALTER TABLE IF EXISTS employees RENAME TO employees_2022;
+SELECT * FROM employees_2022; --sólo para seguir consultando datos
+
+--Agregar columnas a las tablas
+ALTER TABLE IF EXISTS employees_2022 ADD COLUMN email VARCHAR(50);
+
+--Borrar columnas a las tablas
+ALTER TABLE IF EXISTS employees_2022 DROP COLUMN IF EXISTS email;
+
+/*******************************************************************************************/
+-- TABLA CON IDENTIFICADOR AUTOINCREMENTAL(SERIAL) y CLAVE PRIMARIA(PRIMARY KEY)
+-- Además, el nombre será obligatorio (NOT NULL) y el email será único (UNIQUE)
+
+CREATE TABLE IF NOT EXISTS employees_id_nombre_obligatorio_email_unico(
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(30) NOT NULL,
+	email VARCHAR(50) UNIQUE,
+	married BOOLEAN,
+	genre CHAR(1),
+	salary NUMERIC(9,2),
+	birth_day DATE, 
+	start_at TIME 
+);
+
+INSERT INTO employees_id_nombre_obligatorio_email_unico(name, email, married, genre, salary, birth_day, start_at) 
+VALUES ('Abraham', 'abraham@abraham.com', FALSE, 'M', 20000.95, '1987-07-08', '08:30:00');
+
+--comprobamos que no se puede registrar otro elemento con id ya existente
+INSERT INTO employees_id_nombre_obligatorio_email_unico(id, name, email, married, genre, salary, birth_day, start_at) 
+VALUES (1, 'Abraham', 'abraham@abraham.com', FALSE, 'M', 20000.95, '1987-07-08', '08:30:00');
+
+--comprobamos que no se puede añadir un elemento sin el campo obligatorio (name)
+INSERT INTO employees_id_nombre_obligatorio_email_unico(email, married, genre, salary, birth_day, start_at) 
+VALUES ('abraham2@abraham.com', FALSE, 'M', 20000.95, '1987-07-08', '08:30:00');
+
+--comprobamos que no podemos añadir un elemento con email(unico) duplicado
+INSERT INTO employees_id_nombre_obligatorio_email_unico(name, email, married, genre, salary, birth_day, start_at) 
+VALUES ('Abraham', 'abraham@abraham.com', FALSE, 'M', 20000.95, '1987-07-08', '08:30:00');
+
+SELECT * FROM employees_id_nombre_obligatorio_email_unico;
+
+--Borrar la tabla para probar otras cosas volviendo a crear esa tabla luego
+DROP TABLE IF EXISTS employees_id_nombre_obligatorio_email_unico;
+
+/*******************************************************************************************/
+--  RESTRICCIONES EN RANGOS DE LOS DATOS (CHECK)
+
+CREATE TABLE IF NOT EXISTS empleados_rangos_check(
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(30) NOT NULL,
+	salary NUMERIC(9,3) CHECK (salary > 0), -- comprobamos que el salario no será nunca negativo
+	birth_day DATE CHECK (birth_day > '1980-01-01') --comprobamos que no ha nacido antes de 1980
+);
+
+--inserto un elemento que SI cumple el check
+INSERT INTO empleados_rangos_check(name, salary, birth_day) VALUES ('Paco', 10000, '1987-02-09');
+
+--compruebo que no se puede insertar un elemento que NO cumple el ckeck de salario
+INSERT INTO empleados_rangos_check(name, salary) VALUES ('Polo', -5000);
+INSERT INTO empleados_rangos_check(name, salary) VALUES ('Polo', 0);
+
+--compruebo que no se puede insertar un elemento que NO cumple el ckeck de fecha de nacimiento
+INSERT INTO empleados_rangos_check(name, salary, birth_day) VALUES ('Paco', 10000, '1979-12-31');
+
+--Listo todos los elementos de esa tabla
+SELECT * FROM empleados_rangos_check;
+
+--Borrar la tabla para probar otras cosas volviendo a crear esa tabla luego
+DROP TABLE IF EXISTS empleados_rangos_check;
+
+
+/*******************************************************************************************/
+--CARGAR BASE DE DATOS DE EJMPLO "PAGILA"
+
+--1º Descargarse el archivo de github: 
+--https://github.com/devrimgunduz/pagila
+
+--2º Crear la bbbdd
+CREATE DATABASE pagila;
+
+--3º Cargar el esquema de datos en la bbdd
+--Ejecutar el comando de psql en la CMD en la ruta donde tengamos el repositorio de github descargado.
+--psql -h localhost -p 5432 -U postgres -d pagila < pagila-schema.sql
+
+--4º (poblar) Cargar los datos de la bbdd pagila en nuestra réplica
+--Ejecutar el comando psql en cmd igual que el paso 3
+--psql -h localhost -p 5432 -U postgres -d pagila < pagila-data.sql
+
+--Ahora podemos probar a obtener datos de las tablas "En una nueva conexión a la bbdd"
+--Ver el archivo SQL/Sesion1/pagila sesion 1
+--esto es porque si ejecutamos las consultas desde esta conexión, no accederá a la otra bbdd "pagila"
+
+
